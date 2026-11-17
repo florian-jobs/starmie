@@ -6,9 +6,11 @@ import mlflow
 
 from sdd.dataset import PretrainTableDataset
 from sdd.pretrain import train
+from data_path import resolve_data_path
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument("--data", type=str, default=None)
     parser.add_argument("--task", type=str, default="small")
     parser.add_argument("--logdir", type=str, default="results/")
     parser.add_argument("--run_id", type=int, default=0)
@@ -48,18 +50,9 @@ if __name__ == '__main__':
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-    # Change the data paths to where the benchmarks are stored
-    if "santos" in hp.task:
-        path = 'data/%s/datalake' % hp.task
-        if hp.task == "santosLarge":
-            path = 'data/santos-benchmark/real-benchmark/datalake'
-    elif "tus" in hp.task:
-        path = 'data/table-union-search-benchmark/small/benchmark'
-        if hp.task == "tusLarge":
-            path = 'data/table-union-search-benchmark/large/benchmark'
+    # resolve datalake path
+    path = resolve_data_path(hp.task, hp.data)
 
-    else:
-        path = 'data/%s/tables' % hp.task
     # trainset = PretrainTableDataset(path,
     #                      augment_op=hp.augment_op,
     #                      lm=hp.lm,
