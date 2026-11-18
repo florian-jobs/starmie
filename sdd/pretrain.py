@@ -14,7 +14,7 @@ from .dataset import PretrainTableDataset
 
 from tqdm import tqdm
 from torch.utils import data
-from transformers import AdamW, get_linear_schedule_with_warmup
+from transformers import get_linear_schedule_with_warmup
 from typing import List
 
 
@@ -74,8 +74,10 @@ def train(trainset, hp):
     # initialize model, optimizer, and LR scheduler
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = BarlowTwinsSimCLR(hp, device=device, lm=hp.lm)
-    model = model.cuda()
-    optimizer = AdamW(model.parameters(), lr=hp.lr)
+    model = model.to(device)
+    # torch.optim.AdamW with the defaults of the removed transformers.AdamW
+    # (weight_decay=0.0, eps=1e-6), so training matches upstream Starmie
+    optimizer = torch.optim.AdamW(model.parameters(), lr=hp.lr, weight_decay=0.0, eps=1e-6)
     if hp.fp16:
         scaler = torch.cuda.amp.GradScaler()
     else:
