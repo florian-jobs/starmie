@@ -32,7 +32,9 @@ def train_step(train_iter, model, optimizer, scheduler, scaler, hp):
     Returns:
         None
     """
-    for i, batch in enumerate(train_iter):
+    # progress bar (logging only, no effect on training); mininterval keeps log files small
+    for i, batch in enumerate(tqdm(train_iter, total=len(train_iter), desc="epoch %d/%d" % (hp.epoch, hp.n_epochs),
+                                   mininterval=60, dynamic_ncols=True)):
         x_ori, x_aug, cls_indices = batch
         optimizer.zero_grad()
 
@@ -89,6 +91,7 @@ def train(trainset, hp):
     for epoch in range(1, hp.n_epochs+1):
         # train
         model.train()
+        hp.epoch = epoch  # only for the progress bar label
         train_step(train_iter, model, optimizer, scheduler, scaler, hp)
 
         # save the last checkpoint
