@@ -1,7 +1,7 @@
 # Starmie column embeddings (beluga fork)
 
 Pretrained [Starmie](https://www.vldb.org/pvldb/vol16/p1726-fan.pdf) column encoders for
-**OpenData** and **WebTables (small)**. Original code and README: [`README_starmie.md`](README_starmie.md).
+**OpenData** and **WebTables (small)**. Original code and README: [`README_starmie.md`](README_original.md).
 
 ## 1. Setup (Python 3.12, CPU)
 ```bash
