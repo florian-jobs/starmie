@@ -23,19 +23,28 @@ def main():
     if os.listdir(out):
         raise SystemExit("output directory is not empty: %s" % out)
 
-    csvs, other = [], Counter()
-    for root, _, files in os.walk(corpus, followlinks=True):
+    # Same table definition as beluga (src/beluga/offline/run.py): a table is a
+    # leaf directory (no subdirectories). CSVs in non-leaf directories, e.g.
+    # <corpus>/join_paths.csv or fragments/<base>/reconstructed_table.csv, are
+    # not corpus tables and are skipped.
+    csvs, other, skipped_non_leaf = [], Counter(), []
+    for root, dirs, files in os.walk(corpus, followlinks=True):
         for fn in files:
-            if fn.endswith(".csv"):
-                csvs.append(os.path.join(root, fn))
-            else:
+            if not fn.endswith(".csv"):
                 other[os.path.splitext(fn)[1] or fn] += 1
+            elif dirs or fn != "table.csv":  # beluga reads only <leaf>/table.csv
+                skipped_non_leaf.append(os.path.relpath(os.path.join(root, fn), corpus))
+            else:
+                csvs.append(os.path.join(root, fn))
 
     for src in sorted(csvs):
         name = os.path.relpath(src, corpus).replace(os.sep, "__")
         os.symlink(src, os.path.join(out, name))
 
     print("linked %d csv files into %s" % (len(csvs), out))
+    print("skipped %d csv that are not <leaf dir>/table.csv (not corpus tables):" % len(skipped_non_leaf))
+    for path in sorted(skipped_non_leaf):
+        print("  ", path)
     if other:
         print("skipped non-csv files:", dict(other.most_common()))
 
