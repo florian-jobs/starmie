@@ -35,6 +35,10 @@ Hyperparameters: paper defaults; `drop_col` + `tfidf_entity` are the best operat
 - Runs on CPU (`model.to(device)`); trained without `--fp16`.
 - `embed_columns.py` sets `model.eval()` (dropout off, deterministic); upstream does not.
 - `--data` sets the training table directory; `--size` ≥ #tables, so all tables are used.
+- Training tables = exactly beluga's corpus tables (`<leaf dir>/table.csv`, incl. `fragments/`;
+  `join_paths.csv` and `reconstructed_table.csv` excluded): open_data 2,804, web_tables 4,678.
+- Starmie always reads row 1 as header; 84 web_tables tables have `has_header: false`, so their first
+  data row is used as column names (Starmie embeds cell values only, so 1 row lost per such table).
 - `embed_columns.py` reads tables in sorted order, first 1000 rows (as upstream `extractVectors.py`).
 
 ## 5. Tests
