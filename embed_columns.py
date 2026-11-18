@@ -104,12 +104,22 @@ def main():
     model, dataset = load_model(args.model, args.device)
     tables = read_tables(args.tables, args.max_rows)
 
-    embeddings = {name: embed_table(df, model, dataset)
-                  for name, df in tqdm(tables.items(), total=len(tables))}
+    # one bad table (e.g. > 512 tokens, or a cell containing "<s>") must not
+    # discard hours of embeddings: skip it and report it at the end
+    embeddings, failed = {}, {}
+    for name, df in tqdm(tables.items(), total=len(tables)):
+        try:
+            embeddings[name] = embed_table(df, model, dataset)
+        except Exception as e:  # noqa: BLE001
+            failed[name] = "%s: %s" % (type(e).__name__, str(e)[:200])
 
     with open(args.out, "wb") as f:
         pickle.dump(embeddings, f)
     print("wrote %d tables to %s" % (len(embeddings), args.out))
+    if failed:
+        print("FAILED %d tables (not in output):" % len(failed))
+        for name, err in sorted(failed.items()):
+            print("  ", name, err)
 
 
 if __name__ == "__main__":
