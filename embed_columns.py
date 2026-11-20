@@ -87,8 +87,8 @@ def read_tables(table_dir: str, max_rows: int = 1000) -> Dict[str, pd.DataFrame]
     """
     tables = {}
     for fn in sorted(glob.glob(os.path.join(table_dir, "*.csv"))):
-        df = pd.read_csv(fn, lineterminator='\n')
-        tables[os.path.basename(fn)] = df.head(max_rows)
+        # nrows instead of read-then-head: some corpus tables are several GB
+        tables[os.path.basename(fn)] = pd.read_csv(fn, lineterminator='\n', nrows=max_rows)
     return tables
 
 

@@ -129,7 +129,8 @@ class PretrainTableDataset(data.Dataset):
                  lm='roberta',
                  single_column=False,
                  sample_meth='wordProb',
-                 table_order='column'):
+                 table_order='column',
+                 max_rows=None):
         self.tokenizer = AutoTokenizer.from_pretrained(lm_mp[lm])
         self.max_len = max_len
         self.path = path
@@ -158,6 +159,10 @@ class PretrainTableDataset(data.Dataset):
         # row or column order for preprocessing
         self.table_order = table_order
 
+        # read only the first max_rows rows of each table (None = all, as upstream);
+        # needed for corpora with multi-GB tables (they are cached in RAM in full)
+        self.max_rows = max_rows
+
         # tokenizer cache
         self.tokenizer_cache = {}
 
@@ -179,7 +184,8 @@ class PretrainTableDataset(data.Dataset):
                          size=hp.size,
                          single_column=hp.single_column,
                          sample_meth=hp.sample_meth,
-                         table_order=hp.table_order)
+                         table_order=hp.table_order,
+                         max_rows=getattr(hp, "max_rows", None))
 
 
     def _read_table(self, table_id):
@@ -188,7 +194,7 @@ class PretrainTableDataset(data.Dataset):
             table = self.table_cache[table_id]
         else:
             fn = os.path.join(self.path, self.tables[table_id])
-            table = pd.read_csv(fn, lineterminator='\n')
+            table = pd.read_csv(fn, lineterminator='\n', nrows=self.max_rows)
             self.table_cache[table_id] = table
 
         return table

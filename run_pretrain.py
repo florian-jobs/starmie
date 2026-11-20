@@ -16,6 +16,8 @@ if __name__ == '__main__':
     parser.add_argument("--run_id", type=int, default=0)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--max_len", type=int, default=128)
+    # rows read per table (default: all, as upstream); 1000 = same as embedding/extractVectors
+    parser.add_argument("--max_rows", type=int, default=None)
     parser.add_argument("--size", type=int, default=10000)
     parser.add_argument("--lr", type=float, default=5e-5)
     parser.add_argument("--n_epochs", type=int, default=20)
