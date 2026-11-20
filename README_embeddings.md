@@ -5,6 +5,7 @@ Pretrained [Starmie](https://www.vldb.org/pvldb/vol16/p1726-fan.pdf) column enco
 
 ## Quick start on herkules (web_tables model)
 ```bash
+# from your /beluga directory
 git checkout starmie && git submodule update --init tools/starmie && cd tools/starmie
 python3 -m venv ~/starmie-venv && source ~/starmie-venv/bin/activate
 pip install -r requirements-starmie.lock.txt
